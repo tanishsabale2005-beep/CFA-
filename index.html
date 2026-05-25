@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFA Level 1 Study Hub</title>
+    <style>
+        :root {
+            --primary: #1e3a8a; /* Deep Blue */
+            --secondary: #3b82f6;
+            --background: #f3f4f6;
+            --text-main: #1f2937;
+            --card-bg: #ffffff;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.25rem;
+            border-bottom: 2px solid var(--background);
+            padding-bottom: 10px;
+        }
+
+        /* Calculator Styles */
+        .calculator-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 120px;
+            font-size: 1rem;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: var(--secondary);
+        }
+
+        #calc-result {
+            font-weight: bold;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            width: 100%;
+            background-color: #e5e7eb;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            height: 25px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--success);
+            width: 0%;
+            transition: width 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+
+        /* Topics List Styles */
+        .topic-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .topic-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--background);
+            transition: background-color 0.2s;
+        }
+
+        .topic-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .topic-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        .topic-item input[type="checkbox"] {
+            margin-right: 15px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .weight-badge {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .completed-text {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>CFA Level 1 Tracker</h1>
+        <p>Your personalized 300-hour study hub</p>
+    </header>
+
+    <div class="card">
+        <h2>Study Timeline Calculator</h2>
+        <p>The CFA Institute recommends ~300 hours of study. Calculate your timeline based on your daily commitment.</p>
+        <div class="calculator-group">
+            <input type="number" id="dailyHours" placeholder="Hours/Day" min="1" max="24">
+            <button onclick="calculateTimeline()">Calculate Days</button>
+            <span id="calc-result"></span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Syllabus Progress</h2>
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+        <p style="font-size: 0.9rem; color: #6b7280; text-align: right;">Total Topics Mastered: <span id="topicCount">0</span>/10</p>
+    </div>
+
+    <div class="card">
+        <h2>Core Topics</h2>
+        <ul class="topic-list" id="topicList">
+            </ul>
+    </div>
+</div>
+
+<script>
+    // CFA Level 1 Topics and Weights
+    const topics = [
+        { name: "Ethical and Professional Standards", weight: "15-20%" },
+        { name: "Quantitative Methods", weight: "8-12%" },
+        { name: "Economics", weight: "8-12%" },
+        { name: "Financial Statement Analysis", weight: "13-17%" },
+        { name: "Corporate Issuers", weight: "8-12%" },
+        { name: "Equity Investments", weight: "10-12%" },
+        { name: "Fixed Income", weight: "10-12%" },
+        { name: "Derivatives", weight: "5-8%" },
+        { name: "Alternative Investments", weight: "5-8%" },
+        { name: "Portfolio Management", weight: "5-8%" }
+    ];
+
+    const topicListElement = document.getElementById('topicList');
+    const progressBar = document.getElementById('progressBar');
+    const topicCountElement = document.getElementById('topicCount');
+
+    // Render Topics
+    function renderTopics() {
+        topics.forEach((topic, index) => {
+            const li = document.createElement('li');
+            li.className = 'topic-item';
+            
+            li.innerHTML = `
+                <label for="topic-${index}">
+                    <input type="checkbox" id="topic-${index}" onchange="updateProgress(this)">
+                    <span class="topic-name">${topic.name}</span>
+                </label>
+                <span class="weight-badge">${topic.weight}</span>
+            `;
+            topicListElement.appendChild(li);
+        });
+    }
+
+    // Update Progress Bar
+    function updateProgress(checkbox) {
+        // Toggle strikethrough class on the label text
+        const topicNameSpan = checkbox.nextElementSibling;
+        if (checkbox.checked) {
+            topicNameSpan.classList.add('completed-text');
+        } else {
+            topicNameSpan.classList.remove('completed-text');
+        }
+
+        // Calculate progress
+        const checkboxes = document.querySelectorAll('.topic-item input[type="checkbox"]');
+        let completed = 0;
+        
+        checkboxes.forEach(box => {
+            if (box.checked) completed++;
+        });
+
+        const percentage = Math.round((completed / checkboxes.length) * 100);
+        
+        // Update UI
+        progressBar.style.width = `${percentage}%`;
+        progressBar.textContent = percentage > 0 ? `${percentage}%` : '';
+        topicCountElement.textContent = completed;
+    }
+
+    // Calculate Timeline
+    function calculateTimeline() {
+        const hoursPerDay = document.getElementById('dailyHours').value;
+        const resultSpan = document.getElementById('calc-result');
+        
+        if (hoursPerDay > 0 && hoursPerDay <= 24) {
+            const daysRequired = Math.ceil(300 / hoursPerDay);
+            const monthsRequired = (daysRequired / 30).toFixed(1);
+            resultSpan.innerHTML = `You will need roughly <strong>${daysRequired} days</strong> (${monthsRequired} months).`;
+        } else {
+            resultSpan.textContent = "Please enter a valid number of hours.";
+            resultSpan.style.color = "red";
+            setTimeout(() => resultSpan.style.color = "var(--primary)", 2000);
+        }
+    }
+
+    // Initialize the app
+    renderTopics();
+</script>
+
+</body>
+</html>
